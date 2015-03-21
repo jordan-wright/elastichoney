@@ -1,0 +1,15 @@
+{
+    "logfile" : "./elastichoney.log",
+    "use_remote" : false,
+    "remote" : {
+        "url" : "http://example.com",
+        "use_auth" : false,
+        "auth" : {
+            "username" : "",
+            "password" : ""
+        }
+    },
+    "instance_name" : "Green Goblin",
+    "anonymous" : false,
+    "spoofed_version"  : "1.4.1"
+}
