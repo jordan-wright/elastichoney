@@ -80,23 +80,23 @@ var Conf Config
 
 // Attack is a struct that contains the details of an attack entry
 type Attack struct {
-	SourceIP  string    `json:"source-ip"`
+	SourceIP  string    `json:"source"`
 	Timestamp time.Time `json:"@timestamp"`
 	URL       string    `json:"url"`
 	Method    string    `json:"method"`
 	Form      string    `json:"form"`
 	Payload   string    `json:"payload"`
 	Headers   Headers   `json:"headers"`
-	Type      string    `json:"attack-type"`
+	Type      string    `json:"type"`
 	SensorIP  string    `json:"honeypot"`
 }
 
 // Headers contains the filtered headers of the HTTP request
 type Headers struct {
-	UserAgent      string `json:"user-agent"`
+	UserAgent      string `json:"user_agent"`
 	Host           string `json:"host"`
-	ContentType    string `json:"content-type"`
-	AcceptLanguage string `json:"accept-language"`
+	ContentType    string `json:"content_type"`
+	AcceptLanguage string `json:"accept_language"`
 }
 
 // FakeBanner presents a fake elasticsearch banner for the index page

@@ -1,6 +1,8 @@
 {
-	"ResourcesInclude": "config.json,README*,LICENSE*",
-	"ResourcesExclude": "*.go,*.git,.goxc.json",
+	"OutPath": "{{.Dest}}{{.PS}}{{.Version}}{{.PS}}{{.Os}}_{{.Arch}}/{{.ExeName}}{{.Ext}}",
+	"BuildConstraints": "windows linux darwin",
+	"ResourcesInclude": "config.json,README*,INSTALL*,LICENSE*",
+	"ResourcesExclude": "*.go,.goxc.json,*.git",
 	"PackageVersion": "0.0.1",
 	"PrereleaseInfo": "snapshot",
 	"ConfigVersion": "0.9"
