@@ -1,3 +1,4 @@
+![logo](https://i.imgur.com/qKqJ2pc.png)
 # elastichoney
 A Simple Elasticsearch Honeypot
 
