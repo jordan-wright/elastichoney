@@ -8,6 +8,17 @@ Elastichoney is a simple elasticsearch honeypot designed to catch attackers expl
 ### Installation
 Binary distributions for most major systems are provided in the [Releases](https://github.com/jordan-wright/elastichoney/releases).
 
+### Usage
+```
+$ ./elastichoney -h
+Usage of elastichoney:
+  -config="config.json": Location of the configuration file
+  -log="elastichoney.log": Location of the log file
+  -verbose=false: Output verbose logging to STDOUT
+```
+
+See the [blog post](http://jordan-wright.github.io/blog/2015/03/23/introducing-elastichoney-an-elasticsearch-honeypot/) for more details.
+
 ### License
 ```
 The MIT License (MIT)
