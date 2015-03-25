@@ -208,6 +208,7 @@ func FakeSearch(w http.ResponseWriter, r *http.Request) {
 
 // LogRequest handles the logging of requests to configurable endpoints
 func LogRequest(r *http.Request, t string) {
+	as_c := new(bytes.Buffer)
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -239,14 +240,15 @@ func LogRequest(r *http.Request, t string) {
 	if err != nil {
 		logger.Printf("[!] ERROR: %s\n", err)
 	}
+	err = json.Compact(as_c, as)
 	fmt.Printf("%s\n", as)
 	// Log the entry
-	f, err := os.OpenFile(*logFlag, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 066)
+	f, err := os.OpenFile(*logFlag, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0660)
 	if err != nil {
 		logger.Printf("[!] ERROR: %s\n", err)
 	} else {
 		defer f.Close()
-		if _, err = f.WriteString(string(as) + "\n"); err != nil {
+		if _, err = f.WriteString(string(as_c.String()) + "\n"); err != nil {
 			logger.Printf("[!] ERROR: %s\n", err)
 		}
 	}
