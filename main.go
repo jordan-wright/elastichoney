@@ -38,6 +38,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/fw42/go-hpfeeds"
 )
 
 var version = "0.0.1"
@@ -50,15 +51,19 @@ var (
 
 var logger = log.New(os.Stdout, "", log.Lshortfile)
 
+var hpfeedsChannel = make(chan []byte)
+
 // Config represents the configuration information.
 type Config struct {
-	LogFile        string `json:"logfile"`
-	UseRemote      bool   `json:"use_remote"`
-	Remote         Remote `json:"remote"`
-	InstanceName   string `json:"instance_name"`
-	Anonymous      bool   `json:"anonymous"`
-	SensorIP       string `json:"honeypot_ip"`
-	SpoofedVersion string `json:"spoofed_version"`
+	LogFile        string  `json:"logfile"`
+	UseRemote      bool    `json:"use_remote"`
+	Remote         Remote  `json:"remote"`
+	HpFeeds        HpFeeds `json:"hpfeeds"`
+	InstanceName   string  `json:"instance_name"`
+	Anonymous      bool    `json:"anonymous"`
+	SensorIP       string  `json:"honeypot_ip"`
+	SpoofedVersion string  `json:"spoofed_version"`
+	PublicIpUrl    string  `json:"public_ip_url"`
 }
 
 // Remote is a struct used to contain the details for a remote server connection
@@ -66,6 +71,15 @@ type Remote struct {
 	URL     string `json:"url"`
 	UseAuth bool   `json:"use_auth"`
 	Auth    Auth   `json:"auth"`
+}
+
+type HpFeeds struct {
+	Host    string `json:"host"`
+	Port    int    `json:"port"`
+	Channel string `json:"channel"`
+	Ident   string `json:"ident"`
+	Secret  string `json:"secret"`
+	Enabled bool   `json:"enabled"`
 }
 
 // Auth contains the details in case basic auth is to be used when connecting
@@ -275,6 +289,10 @@ func LogRequest(r *http.Request, t string) {
 			}
 		}
 	}
+
+	if Conf.HpFeeds.Enabled {
+		hpfeedsChannel <- []byte(as_c.String())
+	}
 }
 
 // WriteResponse contains the logic to write JSON back out to the attacker
@@ -299,6 +317,29 @@ func JSONMarshal(v interface{}) ([]byte, error) {
 	return b, err
 }
 
+func hpfeedsConnect() {
+	backoff := 0
+	hp := hpfeeds.NewHpfeeds(Conf.HpFeeds.Host, Conf.HpFeeds.Port, Conf.HpFeeds.Ident, Conf.HpFeeds.Secret)
+	hp.Log = true
+	logger.Printf("Connecting to hpfeeds server: %s:%d ...\n", Conf.HpFeeds.Host, Conf.HpFeeds.Port)
+	for {
+		err := hp.Connect()
+		if err == nil {
+			logger.Printf("Connected to Hpfeeds server.")
+			hp.Publish(Conf.HpFeeds.Channel, hpfeedsChannel)
+			<-hp.Disconnected
+			logger.Printf("Lost connection to %s:%d :-(\n", Conf.HpFeeds.Host, Conf.HpFeeds.Port)
+		}
+
+		logger.Printf("Reconnecting to %s:%d after %ds\n", Conf.HpFeeds.Host, Conf.HpFeeds.Port, backoff)
+		time.Sleep(time.Duration(backoff) * time.Second)
+		if backoff <= 10 {
+			backoff++
+		}
+	}
+}
+
+
 func main() {
 	flag.Parse()
 	// Get the config file
@@ -310,7 +351,7 @@ func main() {
 	// If the user doesn't want their honeypot IP to be anonymous, let's get
 	// the external IP
 	if !Conf.Anonymous {
-		resp, err := http.Get("https://www.icanhazip.com")
+		resp, err := http.Get(Conf.PublicIpUrl)
 		if err != nil {
 			panic(err)
 		}
@@ -326,6 +367,11 @@ func main() {
 	if *verboseFlag {
 		logger.Printf("Using sensor ip: %s", Conf.SensorIP)
 	}
+
+	if Conf.HpFeeds.Enabled {
+		go hpfeedsConnect()
+	}
+
 	// Create the handlers
 	http.HandleFunc("/", FakeBanner)
 	http.HandleFunc("/_nodes", FakeNodes)
