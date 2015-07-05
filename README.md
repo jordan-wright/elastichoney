@@ -19,6 +19,15 @@ Usage of elastichoney:
 
 See the [blog post](http://jordan-wright.github.io/blog/2015/03/23/introducing-elastichoney-an-elasticsearch-honeypot/) for more details.
 
+### Docker
+If you would like to compile and run elastichoney using [Docker](https://github.com/docker/docker) and [Docker Compose](https://github.com/docker/compose),
+you can do so by running:
+```
+mkdir logs
+docker-compose build
+docker-compose up
+```
+
 ### License
 ```
 The MIT License (MIT)

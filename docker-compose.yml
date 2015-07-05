@@ -1,0 +1,7 @@
+elastichoney:
+    build: ./
+    volumes:
+        - ./logs:/go/src/app/logs/
+    ports:
+        - 9200:9200
+    command: ./elastichoney -config="config.json" -log="logs/elastichoney.log" -verbose=true
